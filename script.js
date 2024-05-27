@@ -1,34 +1,32 @@
-let fields = [null,  null, null, null, null, null, null, null, null];
+let fields = [null, null, null, null, null, null, null, null, null];
 let currentPlayer = 'cross';
+let gameOver = false;
 
 function init(){
     render();
 }
 
 function handleCellClick(index, cell) {
-    // Prüft, ob das Feld an der Position 'index' im Array 'fields' leer ist
-    if (!fields[index]) {
-        // Setzt das Feld im Array 'fields' auf den aktuellen Spieler ('circle' oder 'cross')
+    if (!fields[index] && !gameOver) {
         fields[index] = currentPlayer;
 
-        // Prüft, welcher Spieler aktuell am Zug ist
         if (currentPlayer === 'circle') {
-            // Setzt den HTML-Inhalt der Zelle auf die SVG-Grafik für den Kreis
             cell.innerHTML = generateCircleSVG();
-            // Wechselt den aktuellen Spieler zu 'cross'
             currentPlayer = 'cross';
         } else {
-            // Setzt den HTML-Inhalt der Zelle auf die SVG-Grafik für das Kreuz
             cell.innerHTML = generateCrossSVG();
-            // Wechselt den aktuellen Spieler zu 'circle'
             currentPlayer = 'circle';
         }
 
-        // Entfernt das onclick-Attribut von der Zelle, sodass diese nicht mehr anklickbar ist
         cell.onclick = null;
+
+        const winner = checkWinner();
+        if (winner) {
+            gameOver = true;
+            drawWinningLine(winner);
+        }
     }
 }
-
 
 function render() {
     const contentDiv = document.getElementById('content');
@@ -53,7 +51,6 @@ function render() {
     contentDiv.innerHTML = tableHTML;
 }
 
-
 function generateCircleSVG() {
     const svg = `
         <svg width="70" height="70" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
@@ -69,7 +66,6 @@ function generateCircleSVG() {
     `;
     return svg;
 }
-
 
 function generateCrossSVG() {
     const svgHTML = `
@@ -94,3 +90,61 @@ function generateCrossSVG() {
     `;
     return svgHTML;
 }
+
+function checkWinner() {
+    const winningCombinations = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+        [0, 4, 8], [2, 4, 6]             // diagonals
+    ];
+
+    for (const combination of winningCombinations) {
+        const [a, b, c] = combination;
+        if (fields[a] && fields[a] === fields[b] && fields[a] === fields[c]) {
+            return combination;
+        }
+    }
+
+    return null;
+}
+
+
+function drawWinningLine(combination) {
+    const lineColor = '#ffffff';
+    const lineWidth = 5;
+
+    const startCell = document.querySelectorAll(`td`)[combination[0]];
+    const endCell = document.querySelectorAll(`td`)[combination[2]];
+    const startRect = startCell.getBoundingClientRect();
+    const endRect = endCell.getBoundingClientRect();
+
+
+    const contentRect = document.getElementById('content').getBoundingClientRect();
+
+    const lineLength = Math.sqrt(
+        Math.pow(endRect.left - startRect.left, 2) + Math.pow(endRect.top - startRect.top, 2)  );
+        Math.pow(endRect.left - startRect.left, 2) + Math.pow(endRect.top - startRect.top, 2) ;
+    const lineAngle = Math.atan2(endRect.top - startRect.top, endRect.left - startRect.left);
+
+  
+    const line = document.createElement('div');
+    line.style.position = 'absolute';
+    line.style.width = `${lineLength}px`;
+    line.style.height = `${lineWidth}px`;
+    line.style.backgroundColor = lineColor;
+    line.style.transform = `rotate(${ lineAngle }rad)`;
+    line.style.top = `${startRect.top + startRect.height / 2 - lineWidth / 2 - contentRect.top}px`;
+    line.style.left = `${startRect.left + startRect.width / 2 - contentRect.left}px`;
+    line.style.transformOrigin = `top left`;
+    document.getElementById('content').appendChild(line);
+}
+
+function restartGame(){
+    for (let index = 0; index < fields.length; index++) {
+        fields[index] = null;        
+    }
+    render();
+}
+  
+
+
