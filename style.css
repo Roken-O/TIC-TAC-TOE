@@ -11,8 +11,8 @@ table {
     border: 5px solid transparent; /* Verhindert äußere Trennlinien */
 }
 td {
-    width: 60px;
-    height: 60px;
+    width: 100px;
+    height: 100px;
     text-align: center;
     vertical-align: middle;
     font-size: 24px;
