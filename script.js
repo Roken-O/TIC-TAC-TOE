@@ -1,7 +1,32 @@
-let fields = [null, 'circle', 'cross', 'circle', null, null, null, null, 'cross'];
+let fields = [null,  null, null, null, null, null, null, null, null];
+let currentPlayer = 'cross';
 
 function init(){
     render();
+}
+
+function handleCellClick(index, cell) {
+    // Prüft, ob das Feld an der Position 'index' im Array 'fields' leer ist
+    if (!fields[index]) {
+        // Setzt das Feld im Array 'fields' auf den aktuellen Spieler ('circle' oder 'cross')
+        fields[index] = currentPlayer;
+
+        // Prüft, welcher Spieler aktuell am Zug ist
+        if (currentPlayer === 'circle') {
+            // Setzt den HTML-Inhalt der Zelle auf die SVG-Grafik für den Kreis
+            cell.innerHTML = generateCircleSVG();
+            // Wechselt den aktuellen Spieler zu 'cross'
+            currentPlayer = 'cross';
+        } else {
+            // Setzt den HTML-Inhalt der Zelle auf die SVG-Grafik für das Kreuz
+            cell.innerHTML = generateCrossSVG();
+            // Wechselt den aktuellen Spieler zu 'circle'
+            currentPlayer = 'circle';
+        }
+
+        // Entfernt das onclick-Attribut von der Zelle, sodass diese nicht mehr anklickbar ist
+        cell.onclick = null;
+    }
 }
 
 
@@ -19,7 +44,7 @@ function render() {
             } else if (fields[index] === 'cross') {
                 cellContent = generateCrossSVG();
             }
-            tableHTML += `<td>${cellContent}</td>`;
+            tableHTML += `<td onclick="handleCellClick(${index}, this)">${cellContent}</td>`;
         }
         tableHTML += '</tr>';
     }
@@ -37,14 +62,6 @@ function generateCircleSVG() {
                     attributeName="stroke-dasharray" 
                     from="0, 188.4" 
                     to="188.4, 188.4" 
-                    dur="200ms" 
-                    fill="freeze" />
-            </circle>
-            <circle cx="35" cy="35" r="30" stroke="none" fill="#00b0ef">
-                <animate 
-                    attributeName="fill-opacity" 
-                    from="0" 
-                    to="1" 
                     dur="200ms" 
                     fill="freeze" />
             </circle>
